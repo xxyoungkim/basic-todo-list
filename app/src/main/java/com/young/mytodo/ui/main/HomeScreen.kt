@@ -55,7 +55,7 @@ fun HomeScreen(viewModel: MainViewModel) {
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("오늘 할 일") }
+                title = { Text("오늘의 할 일") }
             )
         },
     ) { innerPadding ->
