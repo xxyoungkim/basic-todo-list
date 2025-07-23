@@ -7,9 +7,23 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# Android/Jetpack Compose 프로젝트 공통
+*.keystore
+*.jks
+app/google-services.json
+
+# Kotlin/Java
+*.class
+*.jar
+*.war
+*.ear
+
+# OS 관련
+.DS_Store
+Thumbs.db
