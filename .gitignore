@@ -12,6 +12,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/release/
 
 # Android/Jetpack Compose 프로젝트 공통
 *.keystore
