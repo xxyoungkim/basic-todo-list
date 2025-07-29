@@ -1,5 +1,7 @@
 package com.young.mytodo.ui.main.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,22 +16,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.young.mytodo.R
 import com.young.mytodo.domain.model.Todo
-import com.young.mytodo.ui.theme.MyTodoTheme
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TodoItem(
     todo: Todo,
     onClick: (todo: Int) -> Unit = {},
     onDeleteClick: (id: Int) -> Unit = {},
 ) {
-    val format = SimpleDateFormat("yyyy-mm-dd", Locale.getDefault())
+    // date format
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
+    val instant = Instant.ofEpochMilli(todo.date)
+    val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
 
     Column(
         modifier = Modifier
@@ -54,7 +60,7 @@ fun TodoItem(
                 modifier = Modifier.weight(1f),
             ) {
                 Text(
-                    format.format(Date(todo.date)),
+                    formatter.format(localDateTime),
                     color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
                     style = TextStyle(textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None),
                 )
