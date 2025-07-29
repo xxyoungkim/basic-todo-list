@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.young.mytodo.R
 import com.young.mytodo.domain.model.Todo
+import com.young.mytodo.ui.theme.MyTodoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,12 +55,12 @@ fun TodoItem(
             ) {
                 Text(
                     format.format(Date(todo.date)),
-                    color = if (todo.isDone) Color.Gray else Color.Black,
+                    color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
                     style = TextStyle(textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None),
                 )
                 Text(
                     todo.title,
-                    color = if (todo.isDone) Color.Gray else Color.Black,
+                    color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
                     style = TextStyle(textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None),
                 )
             }
