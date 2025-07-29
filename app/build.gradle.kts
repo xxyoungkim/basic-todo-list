@@ -67,9 +67,4 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
-
-    // API 21~25에서도 java.time을 사용하기 위한 라이브러리
-    implementation("org.threeten:threetenbp:1.6.6:no-tzdb") {
-        because("For java.time API support on API < 26")
-    }
 }
