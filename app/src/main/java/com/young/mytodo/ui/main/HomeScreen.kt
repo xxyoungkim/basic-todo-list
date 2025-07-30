@@ -119,8 +119,6 @@ fun HomeScreen(viewModel: MainViewModel) {
                                 }
                             }
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Divider(color = Color.Black, thickness = 1.dp)
                     }
                 }
             }
