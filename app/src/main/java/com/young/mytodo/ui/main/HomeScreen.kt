@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -93,10 +94,9 @@ fun HomeScreen(viewModel: MainViewModel) {
             Divider()
 
             LazyColumn(
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp), // 아이템 간의 패딩
+//                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
             ) {
-                items(viewModel.items.value) { todoItem ->
+                itemsIndexed(viewModel.items.value) { index, todoItem ->
                     Column {
                         TodoItem(
                             todo = todoItem,
@@ -117,7 +117,8 @@ fun HomeScreen(viewModel: MainViewModel) {
                                         viewModel.restoreTodo()
                                     }
                                 }
-                            }
+                            },
+                            isFirst = index == 0
                         )
                     }
                 }

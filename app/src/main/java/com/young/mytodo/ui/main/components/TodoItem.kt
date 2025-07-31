@@ -12,11 +12,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,6 +58,7 @@ fun TodoItem(
     todo: Todo,
     onClick: (todo: Int) -> Unit = {},
     onDeleteClick: (id: Int) -> Unit = {},
+    isFirst: Boolean,
 ) {
     val actionWidth = 60.dp
     val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
@@ -75,18 +81,99 @@ fun TodoItem(
         }
     }
 
+    if (!isFirst) {
+        HorizontalDivider(color = Color.LightGray)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable { onClick(todo.uid) }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragEnd = {
+                        // 스와이프가 절반 이상이면 열기
+                        val threshold = actionWidthPx * 0.5f
+                        offsetX = if (offsetX < -threshold) -actionWidthPx else 0f
+                    },
+                    onHorizontalDrag = { _, dragAmount ->
+                        val newOffset = offsetX + dragAmount
+                        // 오른쪽으로는 밀지 못하게 제한
+                        offsetX = newOffset.coerceIn(-actionWidthPx, 0f)
+                    },
+                )
+            }
     ) {
+        // 콘텐츠 영역
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp)
+                .clickable { onClick(todo.uid) },
+        ) {
+            val iconWidth = 28.dp
+
+            // 내용
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(iconWidth)
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (todo.isDone)
+                                R.drawable.outline_check_box_24
+                            else
+                                R.drawable.outline_check_box_outline_blank_24
+                        ),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .size(24.dp) // 아이콘 크기
+                            .width(iconWidth)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    Text(
+                        dateFormat(todo),
+                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        todo.title,
+                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
+                        ),
+                    )
+                }
+            }
+        }
+
         // 삭제 버튼 (배경)
         Row(
             modifier = Modifier
-                .matchParentSize()
-                .background(Color(0xFFA51212)),
-            horizontalArrangement = Arrangement.End,
+                .align(Alignment.CenterEnd)
+                .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
+                .width(actionWidth)
+                .fillMaxHeight()
+                .background(Color(0xFFA51212))
+                .clickable {
+                    onDeleteClick(todo.uid)
+                    offsetX = 0f
+                },
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -95,53 +182,7 @@ fun TodoItem(
                 tint = Color.White,
                 modifier = Modifier
                     .width(actionWidth)
-                    .clickable {
-                        onDeleteClick(todo.uid)
-                        offsetX = 0f
-                    }
             )
-        }
-
-        // 콘텐츠 영역
-        Row(
-            modifier = Modifier
-                .offset { IntOffset(animatedOffsetX.roundToInt(), 0) }
-                .fillMaxWidth()
-//                .background(MaterialTheme.colorScheme.surface)
-                .background(Color(0xFFF1EAEA))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            // 스와이프가 절반 이상이면 열기
-                            val threshold = actionWidthPx * 0.5f
-                            offsetX = if (offsetX < -threshold) -actionWidthPx else 0f
-                        },
-                        onHorizontalDrag = { _, dragAmount ->
-                            val newOffset = offsetX + dragAmount
-                            // 오른쪽으로는 밀지 못하게 제한
-                            offsetX = newOffset.coerceIn(-actionWidthPx, 0f)
-                        },
-                    )
-                }
-                .padding(16.dp),
-        ) {
-            // 내용
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-//                    .padding(top = 4.dp, bottom = 4.dp),
-            ) {
-                Text(
-                    dateFormat(todo),
-                    color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                    style = TextStyle(textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None),
-                )
-                Text(
-                    todo.title,
-                    color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                    style = TextStyle(textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None),
-                )
-            }
         }
     }
 }
