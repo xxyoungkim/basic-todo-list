@@ -112,7 +112,7 @@ fun TodoItem(
                 .padding(16.dp)
                 .clickable { onClick(todo.uid) },
         ) {
-            val iconWidth = 28.dp
+            val iconWidth = 32.dp
 
             // 내용
             Row(
