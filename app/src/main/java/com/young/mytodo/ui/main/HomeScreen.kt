@@ -106,7 +106,7 @@ fun HomeScreen(viewModel: MainViewModel) {
 
                                 scope.launch {
                                     val result = snackbarHostState.showSnackbar(
-                                        message = "할 일 삭제됨",
+                                        message = "할 일이 삭제되었습니다.",
                                         actionLabel = "취소",
                                         duration = SnackbarDuration.Short,
                                     )
