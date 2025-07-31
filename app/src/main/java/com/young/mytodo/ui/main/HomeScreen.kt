@@ -1,16 +1,11 @@
 package com.young.mytodo.ui.main
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -55,7 +50,7 @@ fun HomeScreen(viewModel: MainViewModel) {
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("오늘의 할 일") }
+                title = { Text("I CAN DO IT") }
             )
         },
     ) { innerPadding ->
@@ -74,13 +69,16 @@ fun HomeScreen(viewModel: MainViewModel) {
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 maxLines = 1,
-                placeholder = { Text("할 일") },
+                placeholder = { Text("할 일을 입력해 주세요.", color = Color.LightGray) },
                 trailingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.outline_add_24),
                         contentDescription = null,
                         modifier = Modifier
-                            .clickable { viewModel.addTodo(text) }
+                            .clickable {
+                                viewModel.addTodo(text)
+                                text = ""
+                            }
                     )
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done), // 키보드 옵션-확인 버튼 체크 모양
