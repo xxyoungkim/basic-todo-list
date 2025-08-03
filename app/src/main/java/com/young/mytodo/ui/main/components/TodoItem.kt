@@ -126,7 +126,7 @@ fun TodoItem(
                     Icon(
                         painter = painterResource(
                             id = if (todo.isDone)
-                                R.drawable.outline_check_box_24
+                                R.drawable.twotone_check_box_24
                             else
                                 R.drawable.outline_check_box_outline_blank_24
                         ),
