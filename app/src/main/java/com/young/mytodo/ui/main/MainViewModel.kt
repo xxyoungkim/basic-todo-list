@@ -20,6 +20,9 @@ class MainViewModel(
 
     private var recentlyDeleteTodo: Todo? = null
 
+    private val _editingTodo = mutableStateOf<Todo?>(null)
+    val editingTodo: State<Todo?> = _editingTodo
+
     init {
         viewModelScope.launch {
             todoRepository.observeTodos()
@@ -68,5 +71,23 @@ class MainViewModel(
                 )
             }
         }
+    }
+
+    fun startEditing(index: Int) {
+        val todo = _items.value.find { it.uid == index }
+        _editingTodo.value = todo
+    }
+
+    fun updateTodo(text: String) {
+        _editingTodo.value?.let { original ->
+            viewModelScope.launch {
+                todoRepository.updateTodo(original.copy(title = text))
+                _editingTodo.value = null // 수정 완료 후 초기화
+            }
+        }
+    }
+
+    fun cancelEditing() {
+        _editingTodo.value = null
     }
 }

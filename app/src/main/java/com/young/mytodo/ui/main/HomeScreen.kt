@@ -1,5 +1,6 @@
 package com.young.mytodo.ui.main
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,16 @@ fun HomeScreen(viewModel: MainViewModel) {
     val focusManager = LocalFocusManager.current
     var text by rememberSaveable { mutableStateOf("") }
 
+    val editingTodo = viewModel.editingTodo.value
+    var isEditing by rememberSaveable { mutableStateOf(false) }
+    var editingTodoId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(editingTodo) {
+        editingTodo?.let {
+            text = it.title // 수정 모드면 기존 텍스트 입력
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -54,6 +66,15 @@ fun HomeScreen(viewModel: MainViewModel) {
             )
         },
     ) { innerPadding ->
+        BackHandler(enabled = editingTodo != null) {
+            // 뒤로가기 눌렀을 때 실행할 로직
+            text = ""
+            viewModel.cancelEditing()
+            editingTodoId = null
+            isEditing = false
+            focusManager.clearFocus()
+        }
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -76,14 +97,25 @@ fun HomeScreen(viewModel: MainViewModel) {
                         contentDescription = null,
                         modifier = Modifier
                             .clickable {
-                                viewModel.addTodo(text)
+                                if (editingTodo != null) {
+                                    viewModel.updateTodo(text)
+                                    editingTodoId = null
+                                } else {
+                                    viewModel.addTodo(text)
+                                }
                                 text = ""
+                                focusManager.clearFocus() // 키보드 숨기기
                             }
                     )
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done), // 키보드 옵션-확인 버튼 체크 모양
                 keyboardActions = KeyboardActions(onDone = {
-                    viewModel.addTodo(text)
+                    if (editingTodo != null) {
+                        viewModel.updateTodo(text)
+                        editingTodoId = null
+                    } else {
+                        viewModel.addTodo(text)
+                    }
                     text = ""
                     focusManager.clearFocus() // 키보드 숨기기
                 }),
@@ -95,6 +127,8 @@ fun HomeScreen(viewModel: MainViewModel) {
 //                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
             ) {
                 itemsIndexed(viewModel.items.value) { index, todoItem ->
+                    val isEditingItem = (todoItem.uid == editingTodoId)
+
                     Column {
                         TodoItem(
                             todo = todoItem,
@@ -116,7 +150,13 @@ fun HomeScreen(viewModel: MainViewModel) {
                                     }
                                 }
                             },
-                            isFirst = index == 0
+                            onUpdateClick = { index ->
+                                isEditing = true
+                                editingTodoId = index
+                                viewModel.startEditing(index)
+                            },
+                            isFirst = index == 0,
+                            isEditing = isEditingItem, // 추가
                         )
                     }
                 }

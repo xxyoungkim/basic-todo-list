@@ -58,14 +58,16 @@ fun TodoItem(
     todo: Todo,
     onClick: (todo: Int) -> Unit = {},
     onDeleteClick: (id: Int) -> Unit = {},
+    onUpdateClick: (id: Int) -> Unit = {},
     isFirst: Boolean,
+    isEditing: Boolean = false,
 ) {
-    val actionWidth = 60.dp
+    val actionWidth = 50.dp
     val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
 
     var offsetX by remember { mutableFloatStateOf(0f) }
     val animatedOffsetX by animateFloatAsState(
-        targetValue = offsetX,
+        targetValue = if (todo.isDone) offsetX else offsetX * 2,
         label = "Offset Animation",
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
@@ -108,7 +110,10 @@ fun TodoItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(
+                    if (isEditing) Color(0x3499BEFF) // 연한 파란색 배경
+                    else MaterialTheme.colorScheme.surface
+                )
                 .padding(16.dp)
                 .clickable { onClick(todo.uid) },
         ) {
@@ -161,28 +166,82 @@ fun TodoItem(
             }
         }
 
-        // 삭제 버튼 (배경)
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
-                .width(actionWidth)
-                .fillMaxHeight()
-                .background(Color(0xFFA51212))
-                .clickable {
-                    onDeleteClick(todo.uid)
-                    offsetX = 0f
-                },
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.outline_delete_24),
-                contentDescription = null,
-                tint = Color.White,
+        if (todo.isDone) {
+            // 삭제 버튼 (배경)
+            Row(
                 modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
                     .width(actionWidth)
-            )
+                    .fillMaxHeight()
+                    .background(Color(0xFFA51212))
+                    .clickable {
+                        onDeleteClick(todo.uid)
+                        offsetX = 0f
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_delete_24),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .width(actionWidth)
+                )
+            }
+        } else {
+            // 수정 버튼 (배경)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
+                    .width(actionWidth)
+                    .fillMaxHeight()
+                    .background(Color(0xFF1E295E))
+                    .clickable {
+                        onUpdateClick(todo.uid)
+                        offsetX = 0f
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_edit_24),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .width(actionWidth)
+                )
+            }
+            // 삭제 버튼 (배경)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset {
+                        IntOffset(
+                            x = (animatedOffsetX + actionWidthPx + actionWidthPx).roundToInt(),
+                            0
+                        )
+                    }
+                    .width(actionWidth)
+                    .fillMaxHeight()
+                    .background(Color(0xFFA51212))
+                    .clickable {
+                        onDeleteClick(todo.uid)
+                        offsetX = 0f
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_delete_24),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .width(actionWidth)
+                )
+            }
         }
     }
 }
