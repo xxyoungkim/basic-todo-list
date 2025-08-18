@@ -14,6 +14,9 @@ interface TodoDao {
     // DAO (Data Access Object)
     // Room 데이터베이스에서 데이터를 직접 조작(읽기, 쓰기)하는 역할을 하는 컴포넌트
 
+    @Query("SELECT * FROM todo WHERE title LIKE '%' || :query || '%' ORDER BY date DESC")
+    fun search(query: String): Flow<List<Todo>>
+
     @Query("SELECT * FROM Todo ORDER BY date DESC")
     fun observe(): Flow<List<Todo>>
 

@@ -11,9 +11,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -52,6 +56,9 @@ fun HomeScreen(viewModel: MainViewModel) {
     var isEditing by rememberSaveable { mutableStateOf(false) }
     var editingTodoId by rememberSaveable { mutableStateOf<Int?>(null) }
 
+    val searchQuery by viewModel.searchQuery
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(editingTodo) {
         editingTodo?.let {
             text = it.title // 수정 모드면 기존 텍스트 입력
@@ -62,16 +69,60 @@ fun HomeScreen(viewModel: MainViewModel) {
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("I CAN DO IT") }
+                title = {
+                    if (isSearching) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = {
+                                viewModel.updateSearchQuery(it)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("검색어를 입력해 주세요.", color = Color.LightGray) },
+                            singleLine = true,
+                        )
+                    } else {
+                        Text("I CAN DO IT")
+                    }
+                },
+                actions = {
+                    if (isSearching) {
+                        IconButton(onClick = {
+                            isSearching = false
+                            viewModel.updateSearchQuery("") // 검색 종료 시 전체 목록 복원
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "닫기",
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            isSearching = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "검색",
+                            )
+                        }
+                    }
+                }
             )
         },
     ) { innerPadding ->
+        // 수정 취소 BackHandler
         BackHandler(enabled = editingTodo != null) {
             // 뒤로가기 눌렀을 때 실행할 로직
             text = ""
             viewModel.cancelEditing()
             editingTodoId = null
             isEditing = false
+            focusManager.clearFocus()
+        }
+        // 검색 취소 BackHandler
+        BackHandler(enabled = isSearching) {
+            // 뒤로가기 눌렀을 때 실행할 로직
+            isSearching = false
+            viewModel.updateSearchQuery("")
             focusManager.clearFocus()
         }
 

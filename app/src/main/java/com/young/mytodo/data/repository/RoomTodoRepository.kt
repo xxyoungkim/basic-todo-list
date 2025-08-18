@@ -14,6 +14,10 @@ class RoomTodoRepository(application: Application) : TodoRepository {
         "todo-db"
     ).build()
 
+    override fun searchTodos(query: String): Flow<List<Todo>> {
+        return db.todoDao().search(query)
+    }
+
     override fun observeTodos(): Flow<List<Todo>> {
         return db.todoDao().observe()
     }

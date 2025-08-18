@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Query
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
 import kotlinx.coroutines.launch
@@ -22,6 +23,9 @@ class MainViewModel(
 
     private val _editingTodo = mutableStateOf<Todo?>(null)
     val editingTodo: State<Todo?> = _editingTodo
+
+    private val _searchQuery = mutableStateOf("")
+    val searchQuery: State<String> = _searchQuery
 
     init {
         viewModelScope.launch {
@@ -89,5 +93,23 @@ class MainViewModel(
 
     fun cancelEditing() {
         _editingTodo.value = null
+    }
+
+    // 검색
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        viewModelScope.launch {
+            if (query.isBlank()) {
+                todoRepository.observeTodos()
+                    .collect { todos ->
+                        _items.value = todos
+                    }
+            } else {
+                todoRepository.searchTodos(query)
+                    .collect { todos ->
+                        _items.value = todos
+                    }
+            }
+        }
     }
 }
