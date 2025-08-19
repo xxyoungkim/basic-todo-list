@@ -208,6 +208,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                             },
                             isFirst = index == 0,
                             isEditing = isEditingItem, // 추가
+                            searchQuery = searchQuery,
                         )
                     }
                 }

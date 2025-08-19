@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -61,6 +59,7 @@ fun TodoItem(
     onUpdateClick: (id: Int) -> Unit = {},
     isFirst: Boolean,
     isEditing: Boolean = false,
+    searchQuery: String,
 ) {
     val actionWidth = 50.dp
     val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
@@ -155,13 +154,14 @@ fun TodoItem(
                         ),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        todo.title,
-                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
-                        ),
-                    )
+                    HighlightedText(fullText = todo.title, keyword = searchQuery, isDone = todo.isDone)
+//                    Text(
+//                        todo.title,
+//                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
+//                        style = MaterialTheme.typography.bodyLarge.copy(
+//                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
+//                        ),
+//                    )
                 }
             }
         }
