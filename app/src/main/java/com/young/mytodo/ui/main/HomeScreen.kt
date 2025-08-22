@@ -1,13 +1,14 @@
 package com.young.mytodo.ui.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,6 +19,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.young.mytodo.R
@@ -56,8 +60,10 @@ fun HomeScreen(viewModel: MainViewModel) {
     var isEditing by rememberSaveable { mutableStateOf(false) }
     var editingTodoId by rememberSaveable { mutableStateOf<Int?>(null) }
 
-    val searchQuery by viewModel.searchQuery
+    val searchQuery by viewModel.searchQuery.collectAsState()
     var isSearching by rememberSaveable { mutableStateOf(false) }
+
+    val groupedTodos by viewModel.groupedItems.collectAsState()
 
     LaunchedEffect(editingTodo) {
         editingTodo?.let {
@@ -177,41 +183,63 @@ fun HomeScreen(viewModel: MainViewModel) {
             LazyColumn(
 //                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
             ) {
-                itemsIndexed(viewModel.items.value) { index, todoItem ->
-                    val isEditingItem = (todoItem.uid == editingTodoId)
-
-                    Column {
-                        TodoItem(
-                            todo = todoItem,
-                            onClick = { index ->
-                                viewModel.toggle(index)
-                            },
-                            onDeleteClick = { index ->
-                                viewModel.deleteTodo(index)
-
-                                scope.launch {
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "할 일이 삭제되었습니다.",
-                                        actionLabel = "취소",
-                                        duration = SnackbarDuration.Short,
-                                    )
-
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        viewModel.restoreTodo()
-                                    }
-                                }
-                            },
-                            onUpdateClick = { index ->
-                                isEditing = true
-                                editingTodoId = index
-                                viewModel.startEditing(index)
-                            },
-                            isFirst = index == 0,
-                            isEditing = isEditingItem, // 추가
-                            searchQuery = searchQuery,
+                groupedTodos.forEach { (date, todos) ->
+                    // 날짜 헤더
+                    item(key = "header_$date") {
+                        Text(
+                            text = date,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(16.dp, 8.dp),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+
+                    items(
+                        items = todos,
+                        key = { todo -> "todo_${todo.uid}" }
+                    ) { todoItem ->
+                        println("📱 LazyColumn item: uid=${todoItem.uid}, title=${todoItem.title}")
+                        val isEditingItem = (todoItem.uid == editingTodo?.uid)
+                        val isFirstInGroup = todos.indexOf(todoItem) == 0
+
+                        Column {
+                            TodoItem(
+                                todo = todoItem,
+                                onClick = { todoId ->
+                                    println("toggle 요청: $todoId") // 디버깅용
+                                    viewModel.toggle(todoId)
+                                },
+                                onDeleteClick = { todoId ->
+                                    viewModel.deleteTodo(todoId)
+
+                                    scope.launch {
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "할 일이 삭제되었습니다.",
+                                            actionLabel = "취소",
+                                            duration = SnackbarDuration.Short,
+                                        )
+
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            viewModel.restoreTodo()
+                                        }
+                                    }
+                                },
+                                onUpdateClick = { todoId ->
+                                    isEditing = true
+                                    editingTodoId = todoId
+                                    viewModel.startEditing(todoId)
+                                },
+                                isFirst = isFirstInGroup,
+                                isEditing = isEditingItem,
+                                searchQuery = searchQuery,
+                            )
+                        }
+                    }
                 }
+
             }
         }
     }

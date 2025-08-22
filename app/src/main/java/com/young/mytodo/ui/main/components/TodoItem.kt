@@ -114,7 +114,10 @@ fun TodoItem(
                     else MaterialTheme.colorScheme.surface
                 )
                 .padding(16.dp)
-                .clickable { onClick(todo.uid) },
+                .clickable {
+                    println("클릭한 todoItem: id = ${todo.uid}, title = ${todo.title}")
+                    onClick(todo.uid)
+                },
         ) {
             val iconWidth = 32.dp
 
@@ -154,7 +157,11 @@ fun TodoItem(
                         ),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    HighlightedText(fullText = todo.title, keyword = searchQuery, isDone = todo.isDone)
+                    HighlightedText(
+                        fullText = todo.title,
+                        keyword = searchQuery,
+                        isDone = todo.isDone
+                    )
 //                    Text(
 //                        todo.title,
 //                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
@@ -256,7 +263,7 @@ fun dateFormat(todo: Todo): String {
         return formatter.format(localDateTime)
     } else {
         // API 26 미만
-        val formatter = SimpleDateFormat("yyyy-mm-dd", Locale.getDefault())
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return formatter.format(Date(todo.date))
     }
 }

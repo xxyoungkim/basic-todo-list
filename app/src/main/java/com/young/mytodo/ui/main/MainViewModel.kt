@@ -1,14 +1,31 @@
 package com.young.mytodo.ui.main
 
 import android.app.Application
+import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Query
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 class MainViewModel(
     application: Application,
@@ -16,25 +33,46 @@ class MainViewModel(
 ) : AndroidViewModel(application = application) {
     // ViewModel의 역할: UI 상태 관리 및 사용자 인터랙션에 따른 비즈니스 로직 처리
 
-    private val _items = mutableStateOf(emptyList<Todo>())
-    val items: State<List<Todo>> = _items
-
+    // 최근 삭제된 todo
     private var recentlyDeleteTodo: Todo? = null
 
+    // 수정 중인 todo
     private val _editingTodo = mutableStateOf<Todo?>(null)
     val editingTodo: State<Todo?> = _editingTodo
 
-    private val _searchQuery = mutableStateOf("")
-    val searchQuery: State<String> = _searchQuery
+    // 검색어
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            todoRepository.observeTodos()
-                .collect { todos ->
-                    _items.value = todos
-                }
+    // 전체 데이터
+    private val allTodosFlow: Flow<List<Todo>> = todoRepository.observeTodos()
+
+    // 필터링된 데이터 변환
+    private val filteredTodosFlow: Flow<List<Todo>> = combine(
+        allTodosFlow,
+        _searchQuery
+    ) { todos, query ->
+        if (query.isBlank()) {
+            todos
+        } else {
+            todos.filter { it.title.contains(query, ignoreCase = true) }
         }
     }
+
+    val groupedItems: StateFlow<Map<String, List<Todo>>> = filteredTodosFlow
+        .map { todos ->
+            todos
+                .sortedByDescending { it.date }
+                .groupBy { dateFormatHeader(it.date) }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    val items: StateFlow<List<Todo>> = filteredTodosFlow
+        .onEach { todos ->
+            Log.d("ViewModel", "Items size: ${todos.size}")
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
 
     fun addTodo(text: String) {
         viewModelScope.launch {
@@ -42,10 +80,8 @@ class MainViewModel(
         }
     }
 
-    fun deleteTodo(index: Int) {
-        val todo = _items.value.find { todo ->
-            todo.uid == index
-        }
+    fun deleteTodo(todoId: Int) {
+        val todo = items.value.find { it.uid == todoId }
         todo?.let {
             viewModelScope.launch {
                 todoRepository.deleteTodo(it)
@@ -64,21 +100,51 @@ class MainViewModel(
     }
 
     // 완료/미완료 toggle
-    fun toggle(index: Int) {
-        val todo = _items.value.find { todo ->
-            todo.uid == index
+    fun toggle(todoId: Int) {
+        val todo = items.value.find { it.uid == todoId }
+
+        if (todo == null) {
+            Log.w("Toggle", "Todo not found with id: $todoId")
+            return
         }
-        todo?.let {
-            viewModelScope.launch {
+
+        viewModelScope.launch {
+            try {
                 todoRepository.updateTodo(
-                    it.copy(isDone = !it.isDone)
+                    todo.copy(isDone = !todo.isDone)
                 )
+            } catch (e: Exception) {
+                Log.e("Toggle", "Failed to toggle todo: ${e.message}")
             }
         }
     }
 
-    fun startEditing(index: Int) {
-        val todo = _items.value.find { it.uid == index }
+    // (디버깅) toggle + 로그
+    fun toggleWithLogging(todoId: Int) {
+        println("Toggle 요청 item todoId: $todoId")
+        println("현재 items: ${items.value.map { "${it.uid}: ${it.title}" }}")
+
+        val todo = items.value.find { it.uid == todoId }
+        println("찾은 todo: $todo")
+
+        toggle(todoId)
+    }
+
+    // (디버깅) 현재 상태 확인용
+    fun debugCurrentState() {
+        viewModelScope.launch {
+            val currentItems = items.value
+            println("=== 현재 ViewModel 상태 ===")
+            println("전체 items 개수: ${currentItems.size}")
+            currentItems.forEach { todo ->
+                println("- id: ${todo.uid}, title: ${todo.title}, isDone: ${todo.isDone}")
+            }
+            println("=========================")
+        }
+    }
+
+    fun startEditing(todoId: Int) {
+        val todo = items.value.find { it.uid == todoId }
         _editingTodo.value = todo
     }
 
@@ -98,18 +164,20 @@ class MainViewModel(
     // 검색
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
-        viewModelScope.launch {
-            if (query.isBlank()) {
-                todoRepository.observeTodos()
-                    .collect { todos ->
-                        _items.value = todos
-                    }
-            } else {
-                todoRepository.searchTodos(query)
-                    .collect { todos ->
-                        _items.value = todos
-                    }
-            }
+    }
+
+
+    private fun dateFormatHeader(date: Long): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // API 26 이상
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
+            val instant = Instant.ofEpochMilli(date)
+            val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+            return formatter.format(localDateTime)
+        } else {
+            // API 26 미만
+            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            return formatter.format(Date(date))
         }
     }
 }
