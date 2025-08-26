@@ -1,6 +1,5 @@
 package com.young.mytodo.ui.main.components
 
-import android.os.Build
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,19 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.young.mytodo.R
 import com.young.mytodo.domain.model.Todo
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -83,7 +72,10 @@ fun TodoItem(
     }
 
     if (!isFirst) {
-        HorizontalDivider(color = Color.LightGray)
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
+            modifier = Modifier.padding(16.dp, 0.dp)
+        )
     }
 
     Box(
@@ -110,16 +102,16 @@ fun TodoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    if (isEditing) Color(0x3499BEFF) // 연한 파란색 배경
+                    if (isEditing) MaterialTheme.colorScheme.surfaceContainer
                     else MaterialTheme.colorScheme.surface
                 )
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .clickable {
                     println("클릭한 todoItem: id = ${todo.uid}, title = ${todo.title}")
                     onClick(todo.uid)
                 },
         ) {
-            val iconWidth = 32.dp
+            val iconWidth = 36.dp
 
             // 내용
             Row(
@@ -129,46 +121,30 @@ fun TodoItem(
                 Column(
                     modifier = Modifier
                         .width(iconWidth)
+                        .padding(8.dp, 0.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(
-                            id = if (todo.isDone)
-                                R.drawable.twotone_check_box_24
-                            else
-                                R.drawable.outline_check_box_outline_blank_24
-                        ),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier
-                            .size(24.dp) // 아이콘 크기
-                            .width(iconWidth)
-                    )
+                    if (todo.isDone) {
+                        Icon(
+                            painter = painterResource(
+                                id = R.drawable.outline_done_24
+                            ),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier
+                                .size(18.dp) // 아이콘 크기
+                                .width(iconWidth)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    Text(
-                        dateFormat(todo),
-                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
-                        ),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     HighlightedText(
                         fullText = todo.title,
                         keyword = searchQuery,
                         isDone = todo.isDone
                     )
-//                    Text(
-//                        todo.title,
-//                        color = if (todo.isDone) Color.Gray else MaterialTheme.colorScheme.onBackground,
-//                        style = MaterialTheme.typography.bodyLarge.copy(
-//                            textDecoration = if (todo.isDone) TextDecoration.LineThrough else TextDecoration.None
-//                        ),
-//                    )
                 }
             }
         }
@@ -178,7 +154,7 @@ fun TodoItem(
             Row(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
+                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), y = 0) }
                     .width(actionWidth)
                     .fillMaxHeight()
                     .background(Color(0xFFA51212))
@@ -202,10 +178,10 @@ fun TodoItem(
             Row(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), 0) }
+                    .offset { IntOffset(x = (animatedOffsetX + actionWidthPx).roundToInt(), y = 0) }
                     .width(actionWidth)
                     .fillMaxHeight()
-                    .background(Color(0xFF1E295E))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .clickable {
                         onUpdateClick(todo.uid)
                         offsetX = 0f
@@ -250,20 +226,5 @@ fun TodoItem(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun dateFormat(todo: Todo): String {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // API 26 이상
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
-        val instant = Instant.ofEpochMilli(todo.date)
-        val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        return formatter.format(localDateTime)
-    } else {
-        // API 26 미만
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return formatter.format(Date(todo.date))
     }
 }

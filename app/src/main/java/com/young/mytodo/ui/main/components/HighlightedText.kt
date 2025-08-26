@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 
 @Composable
 fun HighlightedText(
@@ -23,8 +24,7 @@ fun HighlightedText(
             text = fullText,
             color = if (isDone) Color.Gray else normalColor,
             style = MaterialTheme.typography.bodyLarge.copy(
-                textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough
-                else androidx.compose.ui.text.style.TextDecoration.None
+                textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None
             ),
             modifier = modifier
         )
@@ -66,8 +66,7 @@ fun HighlightedText(
         text = annotatedString,
         color = if (isDone) Color.Gray else normalColor,
         style = MaterialTheme.typography.bodyLarge.copy(
-            textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough
-            else androidx.compose.ui.text.style.TextDecoration.None
+            textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None
         ),
         modifier = modifier
     )
