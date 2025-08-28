@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -85,6 +86,7 @@ fun HomeScreen(viewModel: MainViewModel) {
     var isSearching by rememberSaveable { mutableStateOf(false) }
 
     val groupedTodos by viewModel.groupedItems.collectAsState()
+    val isInitialized by viewModel.isInitialized.collectAsState()
 
     LaunchedEffect(editingTodo) {
         editingTodo?.let {
@@ -169,103 +171,116 @@ fun HomeScreen(viewModel: MainViewModel) {
                     focusManager.clearFocus()
                 }
         ) {
-            if (groupedTodos.isEmpty()) {
-                EmptyState(
-                    message = "할 일이 존재하지 않습니다.",
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                // 할 일 목록 영역
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            focusManager.clearFocus()
-                        },
-                ) {
-                    groupedTodos.forEach { (date, todos) ->
-                        // 날짜 헤더
-                        item(key = "header_$date") {
-                            Box {
-                                Surface(
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 0.dp)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() }
-                                        ) {
-                                            focusManager.clearFocus()
-                                        },
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    shadowElevation = 1.dp,
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(
-                                            horizontal = 28.dp,
-                                            vertical = 6.dp
-                                        ),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
+            when {
+                !isInitialized -> {
+                    // 아직 초기화되지 않은 상태
+                    LoadingScreen()
+                }
+
+                groupedTodos.isEmpty() -> {
+                    // 초기화 완료 -> 데이터가 없는 상태
+                    EmptyState(
+                        message = "할 일이 존재하지 않습니다.",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                else -> {
+                    // 할 일 목록 영역
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                focusManager.clearFocus()
+                            },
+                    ) {
+                        groupedTodos.forEach { (date, todos) ->
+                            // 날짜 헤더
+                            item(key = "header_$date") {
+                                Box {
+                                    Surface(
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp, vertical = 0.dp)
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = remember { MutableInteractionSource() }
+                                            ) {
+                                                focusManager.clearFocus()
+                                            },
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shadowElevation = 1.dp,
                                     ) {
-                                        Text(
-                                            text = date,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        )
+                                        Row(
+                                            modifier = Modifier.padding(
+                                                horizontal = 28.dp,
+                                                vertical = 6.dp
+                                            ),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                text = date,
+                                                style = MaterialTheme.typography.titleSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                            )
-                        }
-
-                        items(
-                            items = todos,
-                            key = { todo -> "todo_${todo.uid}" }
-                        ) { todoItem ->
-                            println("LazyColumn item= id: ${todoItem.uid}, title: ${todoItem.title}")
-                            val isEditingItem = (todoItem.uid == editingTodo?.uid)
-                            val isFirstInGroup = todos.indexOf(todoItem) == 0
-
-                            Column(
-                                modifier = Modifier.clickable { focusManager.clearFocus() }
-                            ) {
-                                TodoItem(
-                                    todo = todoItem,
-                                    onClick = { todoId ->
-                                        println("toggle 요청: $todoId") // 디버깅용
-                                        viewModel.toggle(todoId)
-                                    },
-                                    onDeleteClick = { todoId ->
-                                        viewModel.deleteTodo(todoId)
-
-                                        scope.launch {
-                                            val result = snackbarHostState.showSnackbar(
-                                                message = "할 일이 삭제되었습니다.",
-                                                actionLabel = "취소",
-                                                duration = SnackbarDuration.Short,
-                                            )
-
-                                            if (result == SnackbarResult.ActionPerformed) {
-                                                viewModel.restoreTodo()
-                                            }
-                                        }
-                                    },
-                                    onUpdateClick = { todoId ->
-                                        isEditing = true
-                                        editingTodoId = todoId
-                                        viewModel.startEditing(todoId)
-                                    },
-                                    isFirst = isFirstInGroup,
-                                    isEditing = isEditingItem,
-                                    searchQuery = searchQuery,
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(
+                                        horizontal = 16.dp,
+                                        vertical = 0.dp
+                                    ),
+                                    color = MaterialTheme.colorScheme.primaryContainer,
                                 )
+                            }
+
+                            items(
+                                items = todos,
+                                key = { todo -> "todo_${todo.uid}" }
+                            ) { todoItem ->
+                                println("LazyColumn item= id: ${todoItem.uid}, title: ${todoItem.title}")
+                                val isEditingItem = (todoItem.uid == editingTodo?.uid)
+                                val isFirstInGroup = todos.indexOf(todoItem) == 0
+
+                                Column(
+                                    modifier = Modifier.clickable { focusManager.clearFocus() }
+                                ) {
+                                    TodoItem(
+                                        todo = todoItem,
+                                        onClick = { todoId ->
+                                            println("toggle 요청: $todoId") // 디버깅용
+                                            viewModel.toggle(todoId)
+                                        },
+                                        onDeleteClick = { todoId ->
+                                            viewModel.deleteTodo(todoId)
+
+                                            scope.launch {
+                                                val result = snackbarHostState.showSnackbar(
+                                                    message = "할 일이 삭제되었습니다.",
+                                                    actionLabel = "취소",
+                                                    duration = SnackbarDuration.Short,
+                                                )
+
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    viewModel.restoreTodo()
+                                                }
+                                            }
+                                        },
+                                        onUpdateClick = { todoId ->
+                                            isEditing = true
+                                            editingTodoId = todoId
+                                            viewModel.startEditing(todoId)
+                                        },
+                                        isFirst = isFirstInGroup,
+                                        isEditing = isEditingItem,
+                                        searchQuery = searchQuery,
+                                    )
+                                }
                             }
                         }
                     }
@@ -450,4 +465,18 @@ fun CustomTextField(
             }
         }
     )
+}
+
+@Composable
+private fun LoadingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            color = MaterialTheme.colorScheme.primary,
+            strokeWidth = 5.dp
+        )
+    }
 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -44,6 +45,10 @@ class MainViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    // 초기화 상태
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
+    
     // 전체 데이터
     private val allTodosFlow: Flow<List<Todo>> = todoRepository.observeTodos()
 
@@ -65,7 +70,12 @@ class MainViewModel(
                 .sortedByDescending { it.date }
                 .groupBy { dateFormatHeader(it.date) }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+        .onEach {
+            if(!_isInitialized.value) {
+                _isInitialized.value = true
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     val items: StateFlow<List<Todo>> = filteredTodosFlow
         .onEach { todos ->
@@ -73,6 +83,14 @@ class MainViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    init {
+        val startTime = System.currentTimeMillis()
+        viewModelScope.launch {
+            allTodosFlow.first() // 첫 번째 데이터 대기
+            val endTime = System.currentTimeMillis()
+            Log.d("Performance", "Data loading 걸리는 시간: ${endTime - startTime}ms")
+        }
+    }
 
     fun addTodo(text: String) {
         viewModelScope.launch {
