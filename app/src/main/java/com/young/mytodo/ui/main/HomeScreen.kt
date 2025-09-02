@@ -216,7 +216,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                                         Row(
                                             modifier = Modifier.padding(
                                                 horizontal = 28.dp,
-                                                vertical = 6.dp
+                                                vertical = 4.dp
                                             ),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically,
