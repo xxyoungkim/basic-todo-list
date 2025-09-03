@@ -61,6 +61,9 @@ dependencies {
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
 
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.8.6")
+
     // Room
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")

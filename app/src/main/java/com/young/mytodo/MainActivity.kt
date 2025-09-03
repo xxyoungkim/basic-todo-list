@@ -9,6 +9,7 @@ import com.young.mytodo.ui.theme.MyTodoTheme
 import com.young.mytodo.domain.util.TodoAndroidViewModelFactory
 import com.young.mytodo.ui.main.HomeScreen
 import com.young.mytodo.ui.main.MainViewModel
+import com.young.mytodo.ui.navigation.TodoNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +20,8 @@ class MainActivity : ComponentActivity() {
                 val viewModel: MainViewModel = viewModel(
                     factory = TodoAndroidViewModelFactory(application),
                 )
-                HomeScreen(viewModel = viewModel)
+//                HomeScreen(viewModel = viewModel)
+                TodoNavigation(viewModel = viewModel)
             }
         }
     }
