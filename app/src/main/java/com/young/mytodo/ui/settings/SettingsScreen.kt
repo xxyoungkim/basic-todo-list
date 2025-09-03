@@ -79,9 +79,6 @@ fun SettingsScreen(
                 onClick = { }
             )
             // 데이터 내보내기
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
-            )
             SettingsClickableItem(
                 icon = {
                     Icon(
@@ -96,9 +93,6 @@ fun SettingsScreen(
                 onClick = { }
             )
             // 앱 정보
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
-            )
             SettingsClickableItem(
                 icon = {
                     Icon(
@@ -141,7 +135,7 @@ private fun SettingsClickableItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
+//                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
 //            Text(
@@ -151,4 +145,8 @@ private fun SettingsClickableItem(
 //            )
         }
     }
+
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
+    )
 }
