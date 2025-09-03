@@ -127,6 +127,8 @@ fun HomeScreen(
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
+            // Scaffold의 WindowInsets를 명시적으로 설정
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 TopAppBar(
                     title = {
@@ -336,7 +338,14 @@ fun HomeScreen(
                 }
 
                 // 하단 입력 영역
-                Surface {
+                Surface(
+                    modifier = Modifier
+                        // 네비게이션 바와 키보드 영역 모두 고려
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime) // 키보드(IME) 영역 추가
+                        )
+                ) {
                     BottomInputSection(
                         inputText = text,
                         onInputChange = { text = it },
