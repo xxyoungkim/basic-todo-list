@@ -28,19 +28,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.young.mytodo.R
+import com.young.mytodo.ui.settings.util.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
+fun SettingsThemeScreen(
     onBackClick: () -> Unit,
-    onNavigateToThemeSettings: () -> Unit
+    currentThemeMode: ThemeMode,
+    onThemeModeChanged: (ThemeMode) -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "설정",
+                        text = "테마 설정",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -65,85 +67,76 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // 테마 설정
-            SettingsClickableItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_invert_colors_24),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                title = "테마 설정",
-                description = "어두운 테마 변경",
-                onClick = onNavigateToThemeSettings
-            )
-            // 데이터 내보내기
-            SettingsClickableItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_download_24),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                title = "데이터 내보내기",
-                description = "데이터 텍스트 파일 내보내기",
-                onClick = { }
-            )
-            // 앱 정보
-            SettingsClickableItem(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                title = "앱 정보",
-                description = "버전 및 개발자 정보",
-                onClick = {
-                    // 앱 정보 화면으로 이동 또는 다이얼로그 표시
-                }
+            Text(
+                text = "모드",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
+            // 테마 선택 옵션들
+            ThemeMode.entries.forEach { mode ->
+                ThemeSelectionItem(
+                    mode = mode,
+                    isSelected = currentThemeMode == mode,
+                    onSelect = { onThemeModeChanged(mode) }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun SettingsClickableItem(
-    icon: @Composable () -> Unit,
-    title: String,
-    description: String,
-    onClick: () -> Unit
+private fun ThemeSelectionItem(
+    mode: ThemeMode,
+    isSelected: Boolean,
+    onSelect: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .clickable { onSelect() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        icon()
+        // 아이콘
+        val iconRes = when (mode) {
+            ThemeMode.LIGHT -> R.drawable.outline_light_mode_24
+            ThemeMode.DARK -> R.drawable.outline_dark_mode_24
+            ThemeMode.SYSTEM -> R.drawable.outline_brightness_auto_24
+        }
+
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = if (isSelected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(24.dp)
+        )
 
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = title,
+                text = when (mode) {
+                    ThemeMode.LIGHT -> "라이트 모드"
+                    ThemeMode.DARK -> "다크 모드"
+                    ThemeMode.SYSTEM -> "시스템 설정"
+                },
                 style = MaterialTheme.typography.bodyLarge,
-//                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface
             )
-//            Text(
-//                text = description,
-//                style = MaterialTheme.typography.bodySmall,
-//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-//            )
+        }
+
+        // 선택 표시
+        if (isSelected) {
+            Icon(
+                painter = painterResource(R.drawable.outline_check_24),
+                contentDescription = "선택됨",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 

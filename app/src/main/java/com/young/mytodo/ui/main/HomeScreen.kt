@@ -84,7 +84,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
