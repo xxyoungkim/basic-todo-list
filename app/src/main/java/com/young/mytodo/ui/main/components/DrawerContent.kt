@@ -30,8 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.young.mytodo.R
 
 @Composable
 fun DrawerContent(
@@ -115,8 +117,9 @@ fun DrawerContent(
                     modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
+                    val version = stringResource(id = R.string.app_version)
                     Text(
-                        text = "버전 1.1.0",
+                        text = "버전 $version",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )

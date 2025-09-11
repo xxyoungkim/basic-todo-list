@@ -13,8 +13,9 @@ android {
         applicationId = "com.young.mytodo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.2.0"
+        versionCode = (project.findProperty("APP_VERSION_CODE") as String).toInt()
+        versionName = project.findProperty("APP_VERSION_NAME") as String
+        resValue("string", "app_version", versionName.toString())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
