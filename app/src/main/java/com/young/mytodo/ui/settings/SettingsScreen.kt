@@ -80,19 +80,19 @@ fun SettingsScreen(
                 onClick = onNavigateToThemeSettings
             )
             // 데이터 내보내기
-            SettingsClickableItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_download_24),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                title = "데이터 내보내기",
-                description = "데이터 텍스트 파일 내보내기",
-                onClick = { }
-            )
+//            SettingsClickableItem(
+//                icon = {
+//                    Icon(
+//                        painter = painterResource(R.drawable.outline_download_24),
+//                        contentDescription = null,
+//                        tint = MaterialTheme.colorScheme.onSurface,
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                },
+//                title = "데이터 내보내기",
+//                description = "데이터 텍스트 파일 내보내기",
+//                onClick = { }
+//            )
             // 앱 정보
             SettingsClickableItem(
                 icon = {
