@@ -230,7 +230,7 @@ fun HomeScreen(
                     groupedTodos.isEmpty() -> {
                         // 초기화 완료 -> 데이터가 없는 상태
                         EmptyState(
-                            message = "할 일이 존재하지 않습니다.",
+                            message = "등록된 할 일이 없습니다.",
                             modifier = Modifier.weight(1f)
                         )
                     }
