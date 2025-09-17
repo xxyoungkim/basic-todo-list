@@ -114,7 +114,12 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
             DrawerContent(
-                onSettingsClick = onNavigateToSettings,
+                onSettingsClick = {
+                    onNavigateToSettings()
+                    scope.launch {
+                        drawerState.close()
+                    }
+                },
                 onCloseDrawer = {
                     scope.launch {
                         drawerState.close()
@@ -152,7 +157,12 @@ fun HomeScreen(
                                 tint = MaterialTheme.colorScheme.primaryContainer,
                                 modifier = Modifier.clickable {
                                     scope.launch {
-                                        drawerState.open()
+                                        // 드로어가 이미 열려있다면 닫고, 닫혀있다면 열기
+                                        if (drawerState.isClosed) {
+                                            drawerState.open()
+                                        } else {
+                                            drawerState.close()
+                                        }
                                     }
                                 }
                             )

@@ -100,7 +100,6 @@ fun DrawerContent(
                         text = "설정",
                         onClick = {
                             onSettingsClick()
-                            onCloseDrawer()
                         }
                     )
                 }

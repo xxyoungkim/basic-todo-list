@@ -34,7 +34,12 @@ fun TodoNavigation(
             HomeScreen(
                 viewModel = viewModel,
                 onNavigateToSettings = {
-                    navController.navigate(NavRoutes.SETTINGS)
+                    // launchSingleTop으로 중복 네비게이션 방지
+                    navController.navigate(NavRoutes.SETTINGS) {
+                        launchSingleTop = true
+                        // 현재 홈 화면을 백스택에 유지하면서 설정 화면으로 이동
+                        restoreState = true
+                    }
                 },
             )
         }
@@ -42,10 +47,20 @@ fun TodoNavigation(
         composable(NavRoutes.SETTINGS) {
             SettingsScreen(
                 onBackClick = {
-                    navController.popBackStack()
+                    // popBackStack 대신 명시적으로 HOME으로 네비게이션
+                    if (navController.currentDestination?.route != NavRoutes.HOME) {
+                        navController.navigate(NavRoutes.HOME) {
+                            popUpTo(NavRoutes.HOME) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    }
                 },
                 onNavigateToThemeSettings = {
-                    navController.navigate(NavRoutes.SETTINGS_THEME)
+                    navController.navigate(NavRoutes.SETTINGS_THEME) {
+                        launchSingleTop = true
+                    }
                 },
             )
         }
@@ -53,7 +68,16 @@ fun TodoNavigation(
         composable(NavRoutes.SETTINGS_THEME) {
             SettingsThemeScreen(
                 onBackClick = {
-                    navController.popBackStack()
+                    // 테마 설정에서는 설정 메인으로 돌아가기
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    } else {
+                        // 백스택이 없다면 설정 메인으로 이동
+                        navController.navigate(NavRoutes.SETTINGS) {
+                            popUpTo(NavRoutes.HOME)
+                            launchSingleTop = true
+                        }
+                    }
                 },
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
