@@ -1,3 +1,5 @@
+![header](https://capsule-render.vercel.app/api?type=waving&color=0:85b5fd,100:074CA1&height=200&section=header&text=I%20CAN%20DO%20IT&fontSize=55&fontColor=ffffff&fontAlignY=38)
+
 # ✨I CAN DO IT - 할 일 관리✨
 
 > **Jetpack Compose**를 기반으로 구현한 일정 관리(To-Do) 앱입니다.
