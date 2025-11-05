@@ -75,7 +75,7 @@ app
 - `State`와 `ViewModel`을 활용해 UI 상태를 일관성 있게 관리하고, 데이터 변경에 따라 화면이 자동 갱신되는 반응형 구현
 - `TodoItem`, `DrawerContent`, `HighlightedText` 등 재사용 가능한 컴포넌트 설계
 - `Compose Navigation`을 적용해 화면 전환 흐름 구조화
-- `SharedPreferences`를 활용해 다크 모드 설정 등 사용자 환경설정을 로컬에 저장하고, 앱 재실행 시에도 상태를 유지하도록 구현
+- `SharedPreferences`를 활용해 다크 모드 설정 등 사용자 설정을 로컬에 저장하고, 앱 재실행 시에도 상태를 유지하도록 구현
 - `MediaStore`, `PermissionHandler`를 활용한 파일 접근 및 저장 기능 구현
  
 ---
