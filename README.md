@@ -89,18 +89,6 @@ app
 
 ---
 
-## 배운 점
-- 
-
----
-
 ## 앱 스크린샷
 <!-- 홈 화면, 할 일 추가/삭제 화면, 테마 설정 화면 등 화면 추가 -->
 -
-
----
-
-## 개발자
-**김주영(xxyoungkim)**  
-- Email: [xxyoungkim@gmail.com](mailto:xxyoungkim@gmail.com)  
-- GitHub: [https://github.com/xxyoungkim](https://github.com/xxyoungkim)  
