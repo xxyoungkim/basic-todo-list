@@ -25,7 +25,11 @@ MVVM 패턴을 적용하여 UI와 데이터 계층의 의존성을 줄이고 유
 ---
 
 ## 프로젝트 구조
-
+<details>
+<summary>📁 프로젝트 구조 보기 👀✨</summary>
+<div markdown="1">
+<br>
+ 
 ```plaintext
 app
 ┣ data
@@ -53,6 +57,7 @@ app
 ┃ ┃ ┣ util
 ┃ ┃ ┃ ┣ ThemeMode.kt
 ┃ ┃ ┃ ┗ ThemePreferences.kt
+┃ ┃ ┣ SettingsExportScreen
 ┃ ┃ ┣ SettingsScreen.kt
 ┃ ┃ ┗ SettingsThemeScreen.kt
 ┃ ┣ navigation
@@ -66,6 +71,9 @@ app
 ┃ ┗ PermissionHandler.kt
 ┗ MainActivity.kt
 ```
+
+</div>
+</details>
 
 ---
 
