@@ -97,21 +97,21 @@ fun SettingsScreen(
             )
 
             // 앱 정보
-            SettingsClickableItem(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                title = "앱 정보",
-                description = "버전 및 개발자 정보",
-                onClick = {
-                    // 앱 정보 화면으로 이동 또는 다이얼로그 표시
-                }
-            )
+//            SettingsClickableItem(
+//                icon = {
+//                    Icon(
+//                        imageVector = Icons.Default.Info,
+//                        contentDescription = null,
+//                        tint = MaterialTheme.colorScheme.onSurface,
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                },
+//                title = "앱 정보",
+//                description = "버전 및 개발자 정보",
+//                onClick = {
+//                    // 앱 정보 화면으로 이동 또는 다이얼로그 표시
+//                }
+//            )
 
         }
     }
