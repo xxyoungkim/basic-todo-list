@@ -12,6 +12,7 @@ import com.young.mytodo.ui.settings.SettingsScreen
 import com.young.mytodo.ui.settings.SettingsThemeScreen
 import com.young.mytodo.ui.settings.util.ThemeMode
 import androidx.compose.runtime.getValue
+import com.young.mytodo.ui.settings.SettingsExportScreen
 
 // 네비게이션 경로 정의
 object NavRoutes {
@@ -66,13 +67,11 @@ fun TodoNavigation(
                         launchSingleTop = true
                     }
                 },
-                onExportData = {
-                    viewModel.exportTodosToDownloads()
+                onNavigateToExportSettings = {
+                    navController.navigate(NavRoutes.SETTINGS_EXPORT) {
+                        launchSingleTop = true
+                    }
                 },
-                exportState = exportState,
-                onClearExportState = {
-                    viewModel.clearExportState()
-                }
             )
         }
 
@@ -94,5 +93,28 @@ fun TodoNavigation(
                 onThemeModeChanged = onThemeModeChanged,
             )
         }
+
+        composable(NavRoutes.SETTINGS_EXPORT) {
+            SettingsExportScreen(
+                onBackClick = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(NavRoutes.SETTINGS) {
+                            popUpTo(NavRoutes.HOME)
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onExportData = {
+                    viewModel.exportTodosToDownloads()
+                },
+                exportState = exportState,
+                onClearExportState = {
+                    viewModel.clearExportState()
+                },
+            )
+        }
+
     }
 }
