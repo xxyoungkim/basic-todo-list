@@ -1,36 +1,32 @@
 package com.young.mytodo.data.repository
 
 import android.app.Application
-import androidx.room.Room
 import com.young.mytodo.data.data_source.TodoDatabase
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
 
 class RoomTodoRepository(application: Application) : TodoRepository {
-    private val db = Room.databaseBuilder(
-        application,
-        TodoDatabase::class.java,
-        "todo-db"
-    ).build()
+    private val db = TodoDatabase.getDatabase(application)
+    private val dao = db.todoDao()
 
     override fun searchTodos(query: String): Flow<List<Todo>> {
-        return db.todoDao().search(query)
+        return dao.search(query)
     }
 
     override fun observeTodos(): Flow<List<Todo>> {
-        return db.todoDao().observe()
+        return dao.observe()
     }
 
     override suspend fun addTodo(todo: Todo) {
-        return db.todoDao().insert(todo)
+        return dao.insert(todo)
     }
 
     override suspend fun updateTodo(todo: Todo) {
-        return db.todoDao().update(todo)
+        return dao.update(todo)
     }
 
     override suspend fun deleteTodo(todo: Todo) {
-        return db.todoDao().delete(todo)
+        return dao.delete(todo)
     }
 }

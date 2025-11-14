@@ -75,8 +75,8 @@ class MainViewModel(
     val groupedItems: StateFlow<Map<String, List<Todo>>> = filteredTodosFlow
         .map { todos ->
             todos
-                .sortedByDescending { it.date }
                 .groupBy { dateFormatHeader(it.date) }
+                .toSortedMap(reverseOrder()) // 날짜 기준 역순 정렬
         }
         .onEach {
             if(!_isInitialized.value) {
@@ -95,8 +95,8 @@ class MainViewModel(
     val groupedItemsToDownloads: StateFlow<Map<String, List<Todo>>> = allTodosFlow
         .map { todos ->
             todos
-                .sortedByDescending { it.date }
                 .groupBy { dateFormatHeader(it.date) }
+                .toSortedMap(reverseOrder())
         }
         .onEach {
             if(!_isInitialized.value) {

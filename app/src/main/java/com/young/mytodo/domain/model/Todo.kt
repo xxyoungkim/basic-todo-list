@@ -1,9 +1,12 @@
 package com.young.mytodo.domain.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    indices = [Index(value = ["date"])]
+)
 data class Todo(
     @PrimaryKey(autoGenerate = true)
     val uid: Int = 0,
