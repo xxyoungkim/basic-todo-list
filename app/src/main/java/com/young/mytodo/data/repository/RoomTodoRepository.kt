@@ -1,14 +1,14 @@
 package com.young.mytodo.data.repository
 
-import android.app.Application
-import com.young.mytodo.data.data_source.TodoDatabase
+import com.young.mytodo.data.data_source.TodoDao
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class RoomTodoRepository(application: Application) : TodoRepository {
-    private val db = TodoDatabase.getDatabase(application)
-    private val dao = db.todoDao()
+class RoomTodoRepository @Inject constructor(
+    private val dao: TodoDao
+) : TodoRepository {
 
     override fun searchTodos(query: String): Flow<List<Todo>> {
         return dao.search(query)

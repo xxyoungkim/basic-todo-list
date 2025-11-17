@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
 import com.young.mytodo.util.MediaStoreFileManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,8 +29,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     application: Application,
     private val todoRepository: TodoRepository,
 ) : AndroidViewModel(application = application) {
@@ -56,7 +59,7 @@ class MainViewModel(
     // 초기화 상태
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
-    
+
     // 전체 데이터
     private val allTodosFlow: Flow<List<Todo>> = todoRepository.observeTodos()
 
@@ -79,7 +82,7 @@ class MainViewModel(
                 .toSortedMap(reverseOrder()) // 날짜 기준 역순 정렬
         }
         .onEach {
-            if(!_isInitialized.value) {
+            if (!_isInitialized.value) {
                 _isInitialized.value = true
             }
         }
@@ -99,7 +102,7 @@ class MainViewModel(
                 .toSortedMap(reverseOrder())
         }
         .onEach {
-            if(!_isInitialized.value) {
+            if (!_isInitialized.value) {
                 _isInitialized.value = true
             }
         }
@@ -259,8 +262,10 @@ class MainViewModel(
                             when {
                                 exception.message?.contains("권한") == true ->
                                     "파일 저장 권한이 필요합니다."
+
                                 exception.message?.contains("space") == true ->
                                     "저장 공간이 부족합니다."
+
                                 else ->
                                     "파일 저장 중 오류가 발생했습니다: ${exception.message}"
                             }
