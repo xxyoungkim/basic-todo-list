@@ -9,6 +9,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.young.mytodo.domain.model.Todo
 import com.young.mytodo.domain.repository.TodoRepository
+import com.young.mytodo.util.MediaStoreFileManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,12 +29,21 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     application: Application,
     private val todoRepository: TodoRepository,
 ) : AndroidViewModel(application = application) {
     // ViewModel의 역할: UI 상태 관리 및 사용자 인터랙션에 따른 비즈니스 로직 처리
+
+    // MediaStore 파일 매니저로 변경
+    private val mediaStoreFileManager = MediaStoreFileManager(application)
+
+    // todo 내보내기 상태 관리
+    private val _exportState = MutableStateFlow<ExportState>(ExportState.Idle)
+    val exportState: StateFlow<ExportState> = _exportState.asStateFlow()
 
     // 최근 삭제된 todo
     private var recentlyDeleteTodo: Todo? = null
@@ -48,7 +59,7 @@ class MainViewModel(
     // 초기화 상태
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
-    
+
     // 전체 데이터
     private val allTodosFlow: Flow<List<Todo>> = todoRepository.observeTodos()
 
@@ -67,11 +78,11 @@ class MainViewModel(
     val groupedItems: StateFlow<Map<String, List<Todo>>> = filteredTodosFlow
         .map { todos ->
             todos
-                .sortedByDescending { it.date }
                 .groupBy { dateFormatHeader(it.date) }
+                .toSortedMap(reverseOrder()) // 날짜 기준 역순 정렬
         }
         .onEach {
-            if(!_isInitialized.value) {
+            if (!_isInitialized.value) {
                 _isInitialized.value = true
             }
         }
@@ -82,6 +93,20 @@ class MainViewModel(
             Log.d("ViewModel", "Items size: ${todos.size}")
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    // 파일 내보내기용 아이템 목록
+    val groupedItemsToDownloads: StateFlow<Map<String, List<Todo>>> = allTodosFlow
+        .map { todos ->
+            todos
+                .groupBy { dateFormatHeader(it.date) }
+                .toSortedMap(reverseOrder())
+        }
+        .onEach {
+            if (!_isInitialized.value) {
+                _isInitialized.value = true
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     init {
         val startTime = System.currentTimeMillis()
@@ -108,7 +133,9 @@ class MainViewModel(
         }
     }
 
-    // 삭제한 todo 복구
+    /**
+     * 삭제한 todo 복구
+     */
     fun restoreTodo() {
         // return@launch은 launch 코루틴 블록 안에서 벗어난다는 의미
         viewModelScope.launch {
@@ -117,7 +144,9 @@ class MainViewModel(
         }
     }
 
-    // 완료/미완료 toggle
+    /**
+     * 완료/미완료 toggle
+     */
     fun toggle(todoId: Int) {
         val todo = items.value.find { it.uid == todoId }
 
@@ -137,7 +166,9 @@ class MainViewModel(
         }
     }
 
-    // (디버깅) toggle + 로그
+    /**
+     * (디버깅) toggle + 로그
+     */
     fun toggleWithLogging(todoId: Int) {
         println("Toggle 요청 item todoId: $todoId")
         println("현재 items: ${items.value.map { "${it.uid}: ${it.title}" }}")
@@ -148,7 +179,9 @@ class MainViewModel(
         toggle(todoId)
     }
 
-    // (디버깅) 현재 상태 확인용
+    /**
+     * (디버깅) 현재 상태 확인용
+     */
     fun debugCurrentState() {
         viewModelScope.launch {
             val currentItems = items.value
@@ -179,7 +212,9 @@ class MainViewModel(
         _editingTodo.value = null
     }
 
-    // 검색
+    /**
+     * 검색
+     */
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -198,4 +233,66 @@ class MainViewModel(
             return formatter.format(Date(date))
         }
     }
+
+    /**
+     * todo 목록을 Downloads 폴더에 텍스트 파일로 저장
+     */
+    fun exportTodosToDownloads() {
+        viewModelScope.launch {
+            try {
+                _exportState.value = ExportState.Loading
+
+                // 현재 모든 할 일 목록 가져오기
+                val currentGroupedTodos = groupedItemsToDownloads.value
+
+                if (currentGroupedTodos.isEmpty()) {
+                    _exportState.value = ExportState.Error("내보낼 할 일이 없습니다.")
+                    return@launch
+                }
+
+                // MediaStore를 사용하여 Downloads 폴더에 파일 저장
+                val result = mediaStoreFileManager.saveToDownloads(currentGroupedTodos)
+
+                result.fold(
+                    onSuccess = { filePath ->
+                        _exportState.value = ExportState.Success(filePath)
+                    },
+                    onFailure = { exception ->
+                        _exportState.value = ExportState.Error(
+                            when {
+                                exception.message?.contains("권한") == true ->
+                                    "파일 저장 권한이 필요합니다."
+
+                                exception.message?.contains("space") == true ->
+                                    "저장 공간이 부족합니다."
+
+                                else ->
+                                    "파일 저장 중 오류가 발생했습니다: ${exception.message}"
+                            }
+                        )
+                    }
+                )
+
+            } catch (e: Exception) {
+                _exportState.value = ExportState.Error("예상치 못한 오류가 발생했습니다: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * 내보내기 상태 초기화
+     */
+    fun clearExportState() {
+        _exportState.value = ExportState.Idle
+    }
+}
+
+/**
+ * 파일 내보내기 상태 관리
+ */
+sealed class ExportState {
+    object Idle : ExportState()
+    object Loading : ExportState()
+    data class Success(val filePath: String) : ExportState()
+    data class Error(val message: String) : ExportState()
 }

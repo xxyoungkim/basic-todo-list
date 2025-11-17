@@ -33,7 +33,8 @@ import com.young.mytodo.R
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
-    onNavigateToThemeSettings: () -> Unit
+    onNavigateToThemeSettings: () -> Unit,
+    onNavigateToExportSettings: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -77,38 +78,40 @@ fun SettingsScreen(
                 },
                 title = "테마 설정",
                 description = "어두운 테마 변경",
-                onClick = onNavigateToThemeSettings
+                onClick = onNavigateToThemeSettings,
             )
+
             // 데이터 내보내기
-//            SettingsClickableItem(
-//                icon = {
-//                    Icon(
-//                        painter = painterResource(R.drawable.outline_download_24),
-//                        contentDescription = null,
-//                        tint = MaterialTheme.colorScheme.onSurface,
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                },
-//                title = "데이터 내보내기",
-//                description = "데이터 텍스트 파일 내보내기",
-//                onClick = { }
-//            )
-            // 앱 정보
             SettingsClickableItem(
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        painter = painterResource(R.drawable.outline_download_24),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                title = "앱 정보",
-                description = "버전 및 개발자 정보",
-                onClick = {
-                    // 앱 정보 화면으로 이동 또는 다이얼로그 표시
-                }
+                title = "데이터 내보내기",
+                description = "데이터 파일 내보내기",
+                onClick = onNavigateToExportSettings,
             )
+
+            // 앱 정보
+//            SettingsClickableItem(
+//                icon = {
+//                    Icon(
+//                        imageVector = Icons.Default.Info,
+//                        contentDescription = null,
+//                        tint = MaterialTheme.colorScheme.onSurface,
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                },
+//                title = "앱 정보",
+//                description = "버전 및 개발자 정보",
+//                onClick = {
+//                    // 앱 정보 화면으로 이동 또는 다이얼로그 표시
+//                }
+//            )
 
         }
     }
@@ -119,7 +122,8 @@ private fun SettingsClickableItem(
     icon: @Composable () -> Unit,
     title: String,
     description: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
