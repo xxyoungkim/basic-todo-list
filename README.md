@@ -15,7 +15,7 @@ Jetpack Compose 기반의 UI와 Room을 활용한 로컬 데이터 저장 구조
 ## 주요 화면
 <!-- 홈 화면, 할 일 추가/삭제 화면, 테마 설정 화면 등 화면 추가 -->
 
-| 홈 (할 일 목록) 1 | 홈 (할 일 목록) 2 | 할 일 등록 | 편집 및 메모 | 설정 |
+| 홈 (달력형) | 홈 (목록형) | 할 일 등록 | 편집 및 메모 | 설정 |
 |:---:|:---:|:---:|:---:|:---:|
 | ![홈화면1](https://github.com/user-attachments/assets/7d9542bb-180a-444d-b785-116e97fca02c) | ![홈화면2](https://github.com/user-attachments/assets/a24231f3-7314-4055-8c1d-9a8acbfcec6b) | ![등록화면](https://github.com/user-attachments/assets/587cd064-e9a7-4c34-8b7c-3e4735844dd7) | ![수정화면](https://github.com/user-attachments/assets/b42b45b8-fff9-4cb3-8efa-96d8bcf86cf2) | ![설정화면](https://github.com/user-attachments/assets/8f6cafd0-3bcf-4aa7-959c-816dca643090) |
 
