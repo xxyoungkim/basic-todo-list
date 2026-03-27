@@ -1,6 +1,6 @@
 ![header](https://capsule-render.vercel.app/api?type=waving&color=0:85b5fd,100:074CA1&height=200&section=header&text=I%20CAN%20DO%20IT&fontSize=55&fontColor=ffffff&fontAlignY=38)
 
-# ✨I CAN DO IT - 할 일 관리✨
+# ✨I CAN DO IT - 투두리스트✨
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.young.mytodo)
 
 ---
@@ -84,7 +84,7 @@ MVVM 구조를 적용하여 레이어 간 의존성을 줄이고 유지보수성
 ## 성과 및 기술 포인트
 - `Jetpack Compose`의 선언형 UI 방식으로 상태 변화에 따른 UI 갱신을 자동화하여 UI 로직 복잡도 감소
 - `Room + Flow`를 활용해 데이터 변경이 UI에 실시간 반영되는 **반응형 데이터 흐름 구축**, 앱 상태 관리 안정성 향상
-- MVVM 패턴을 기반으로 **UI와 비즈니스 로직을 분리**하여 유지보수 시 코드 영향 범위를 최소화
+- 추후 서버 연동 시 Data Layer의 코드 수정만으로 기능을 확장할 수 있도록 MVVM 패턴을 기반으로 **UI와 비즈니스 로직을 분리하여 설계**함으로써 코드 영향 범위를 최소화하고 유지보수성을 높임
 - `MediaStore` 기반의 파일 저장 기능 구현으로 **Scoped Storage 정책에 대한 이해** 및 실제 환경 대응 능력 강화
 
 ---
