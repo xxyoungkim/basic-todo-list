@@ -5,6 +5,22 @@
 
 ---
 
+<p align="left">
+  <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white">
+  <img src="https://img.shields.io/badge/Android%20SDK%2024+-3DDC84?style=for-the-badge&logo=android&logoColor=white">
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white">
+  <img src="https://img.shields.io/badge/SQLite%20(Room)-003B57?style=for-the-badge&logo=sqlite&logoColor=white">
+</p>
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Architecture-MVVM-orange?style=flat-square">
+  <img src="https://img.shields.io/badge/DI-Hilt-blue?style=flat-square">
+  <img src="https://img.shields.io/badge/Async-Coroutines%20%26%20Flow-darkblue?style=flat-square">
+  <img src="https://img.shields.io/badge/Local%20DB-Room-brightgreen?style=flat-square">
+</p>
+
+---
+
 ## 프로젝트 개요
 
 Google Play에 출시한 Android 할 일 관리 앱입니다.  
@@ -13,11 +29,11 @@ Jetpack Compose 기반의 UI와 Room을 활용한 로컬 데이터 저장 구조
 ---
 
 ## 주요 화면
-<!-- 홈 화면, 할 일 추가/삭제 화면, 테마 설정 화면 등 화면 추가 -->
 
-| 홈 (달력형) | 홈 (목록형) | 할 일 등록 | 편집 및 메모 | 설정 |
-|:---:|:---:|:---:|:---:|:---:|
-| ![홈화면1](https://github.com/user-attachments/assets/7d9542bb-180a-444d-b785-116e97fca02c) | ![홈화면2](https://github.com/user-attachments/assets/a24231f3-7314-4055-8c1d-9a8acbfcec6b) | ![등록화면](https://github.com/user-attachments/assets/587cd064-e9a7-4c34-8b7c-3e4735844dd7) | ![수정화면](https://github.com/user-attachments/assets/b42b45b8-fff9-4cb3-8efa-96d8bcf86cf2) | ![설정화면](https://github.com/user-attachments/assets/8f6cafd0-3bcf-4aa7-959c-816dca643090) |
+| 홈 (달력형) | 홈 (목록형) | 할 일 등록 | 삭제 및 되살리기 | 테마 설정 | 데이터 백업/복원 |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| ![home1](https://github.com/user-attachments/assets/1610787d-64b3-4991-91dc-19a108c18bbc) | ![home2](https://github.com/user-attachments/assets/ed9ac46e-20f0-4fd4-a13f-c342b1001810) | ![add](https://github.com/user-attachments/assets/8726a32b-9110-4892-aff7-72696f2e29f8) | ![delete_undo](https://github.com/user-attachments/assets/3a200e50-7cb4-4805-86a9-256611dc2fd5) | ![theme_setting](https://github.com/user-attachments/assets/73e9f34f-6920-4281-aaf4-10b851e94d96) | ![data_backup](https://github.com/user-attachments/assets/d7d39c24-7b46-453b-8fb9-7f3e6f5c501a) |
+
 
 ---
 
@@ -86,6 +102,8 @@ MVVM 구조를 적용하여 레이어 간 의존성을 줄이고 유지보수성
 - `Room + Flow`를 활용해 데이터 변경이 UI에 실시간 반영되는 **반응형 데이터 흐름 구축**, 앱 상태 관리 안정성 향상
 - 추후 서버 연동 시 Data Layer의 코드 수정만으로 기능을 확장할 수 있도록 MVVM 패턴을 기반으로 **UI와 비즈니스 로직을 분리하여 설계**함으로써 코드 영향 범위를 최소화하고 유지보수성을 높임
 - `MediaStore` 기반의 파일 저장 기능 구현으로 **Scoped Storage 정책에 대한 이해** 및 실제 환경 대응 능력 강화
+**
+- 백엔드 개발 경험을 바탕으로 데이터의 무결성을 최우선으로 고려했습니다. Room Entity 설계 시 정규화 원칙을 적용하고, 비동기 데이터 흐름(Flow)을 통해 데이터의 최신 상태를 보장하는 안정적인 아키텍처를 구축했습니다.
 
 ---
 
@@ -154,5 +172,20 @@ contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
 // API 28 이하 : 직접 파일 시스템 접근
 FileOutputStream(File(downloadsDir, fileName))
 ```
+
+---
+
+## 트러블슈팅
+
+### 텍스트 파일 한글 깨짐
+
+- 문제: UTF-8로 저장한 텍스트 파일을 Windows 메모장·웹 브라우저에서 열면 한글 깨짐
+- 원인: 인코딩 선언 없이 저장 시 프로그램이 인코딩을 추측하는 과정에서 오류 발생
+- 해결: 파일 첫 3바이트에 UTF-8 BOM(0xEF 0xBB 0xBF) 추가로 인코딩 명시
+
+### Material3 TextField contentPadding 미지원
+
+- 문제: TextField는 contentPadding 파라미터를 외부에 노출하지 않음
+- 해결: BasicTextField + TextFieldDefaults.DecorationBox 조합으로 교체하여 padding 완전 제어
 
 ---
